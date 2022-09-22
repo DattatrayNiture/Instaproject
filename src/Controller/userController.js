@@ -4,7 +4,7 @@ const validator = require("../Validator/validator");
 const jwt = require("jsonwebtoken");
 const validatEmail = require("validator")
 const aws = require("aws-sdk");
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 
 aws.config.update(
     {

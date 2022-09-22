@@ -1,6 +1,6 @@
 
-const postModel = require("../Models/postModel")
-const userModel = require("../Models/userSchema")
+const postModel = require("../Models/postModel");
+const userModel = require("../Models/userSchema");
 const moment = require('moment')
 const validator = require("../Validator/validator")
 const aws = require("aws-sdk");
@@ -39,15 +39,11 @@ aws.config.update(
 
 const createPost = async function (req, res) {
     try {
-        let { post, text, status, tags, friendTags, isPublished } = req.body;
+        let { post, text, status, tags, friendTags } = req.body;
         const userId = req.params.userId;
         if ( !text || !req.params.userId) {
              return res.status(400).send({ status: true, msg: "ERROR! : BAD REQUEST please fill all fields" }) 
             }
-        if (isPublished == true) {
-            let Date = moment().format("YYYY-MM-DD[T]HH:mm:ss")
-            req.body.publishedAt = Date
-        }
         req.body.tags = JSON.parse(tags)
         req.body.friendTags = JSON.parse(friendTags)
         let user = await userModel.findById(userId)
@@ -136,7 +132,7 @@ const deletePost = async function (req, res) {
         let postId = req.params.postId
 
         await postModel.find({ _id: postId, isDeleted: false })
-        let date = moment().format("YYYY-MM-DD[T]HH:mm:ss")
+        let date = new Date()
 
         await postModel.findByIdAndUpdate({ _id: blogId }, { isDeleted: true, deletedAt: date }, { new: true })
         return res.status(200).send({status:true, msg:"Done"})
