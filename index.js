@@ -3,7 +3,6 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
-const { urlencoded } = require('body-parser')
 const routes = require('./src/routes/routes')
 const multer = require('multer')
 
