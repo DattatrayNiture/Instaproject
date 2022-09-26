@@ -122,14 +122,11 @@ const registerUser = async function (req, res) {
                     message: `${email} is already used so please put valid input`,
                 });
             }
-
             if (!validator.isValid(password)) {
                 return res
                     .status(400)
                     .send({ status: false, message: "enter valid password" });
             }
-
-
             if (!validator.isValidPassword(password)) {
                 return res.status(400).send({
                     status: false,
@@ -137,7 +134,6 @@ const registerUser = async function (req, res) {
 
                 })
             }
-
             if (!validator.isValid(confirmPassword)) {
                 return res
                     .status(400)

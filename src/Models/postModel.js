@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId
+const mongoosePagination = require("mongoose-paginate-v2")
 
 const postSchema = new mongoose.Schema({
     post: {type:String, required:true}, // s3 link
@@ -21,6 +22,7 @@ const postSchema = new mongoose.Schema({
     tags: [{
         type: String
     }],
+    id:{type:Number,required:true},
     like:[{type: Number, ref: 'User'}],
     likeCounts:{type: Number, default:0},
     dislike:[{type: Number, ref: 'User'}],
@@ -38,5 +40,7 @@ const postSchema = new mongoose.Schema({
 
 
 }, { timestamps: true });
+
+postSchema.plugin(mongoosePagination)
 
 module.exports = mongoose.model('Post', postSchema) //users

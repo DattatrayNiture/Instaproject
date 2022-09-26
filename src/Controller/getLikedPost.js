@@ -16,11 +16,11 @@ const myLikedPost = async (req, res) =>{
         const getLikedPost = await likesModel.findOne({userId:userId});
         const result = []
        
-        for(let i=0; i<getLikedPost.likes.length; i++){
+        for(let i=0; i< getLikedPost.likes.length; i++){
        
-            let obj = await postModel.findOne({_id:getLikedPost.likes[i]})  // getLikedPost.likes[i]
+            let obj = await postModel.findOne({id:getLikedPost.likes[i]})  // getLikedPost.likes[i]
             if(JSON.stringify(obj.userId)!==JSON.stringify(userId)){
-                result.push(obj.userId)
+                result.push(obj._id)
             }
         }
 

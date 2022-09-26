@@ -19,7 +19,7 @@ const likes = async (req, res) => {
         }
         const likesExists = await likesModel.findOne({ userId: userId }).lean()
 
-        const post = await postModel.findById({ _id: postId });
+        const post = await postModel.findById({ _id: postId }).lean();
 
         if (!post) {
             return res.status(404).send({ status: false, msg: "ERROR! post not found" })
@@ -32,17 +32,27 @@ const likes = async (req, res) => {
                     likes: [],
                     dislikes: []
                 }
-                likedoc.likes.push(postId);
+                likedoc.likes.push(post.id);
                 post.like.push(user.id);
+                post.likeCounts++;
                 const result = await likesModel.create(likedoc)
-                return res.status(200).send({ status: true, msg: "success first like", data: result })
+                await postModel.findOneAndUpdate({ _id: postId }, post)
+                return res.status(201).send({ status: true, msg: "success first like", data: result })
             } else {
 
                 if (post.like.indexOf(user.id) == -1) {
-                    likesExists.likes.push(postId)
+
+                    if (post.dislike.indexOf(user.id) !== -1){
+
+                        post.dislike.splice(post.dislike.indexOf(user.id), 1);
+                        likesExists.dislikes.splice(likesExists.dislikes.indexOf(post.id), 1)
+                        post.dislikeCounts--;
+                    }
+
+                    likesExists.likes.push(post.id)
                     post.like.push(user.id);
                     post.likeCounts++;
-                    console.log(likesExists)
+                    //console.log(likesExists)
                     const result = await likesModel.findOneAndUpdate({ userId: userId }, likesExists, { new: true })
                     await postModel.findOneAndUpdate({ _id: postId }, post)
                     return res.status(200).send({ status: true, msg: "success like", data: result })
@@ -53,8 +63,9 @@ const likes = async (req, res) => {
             }
 
         } else if (request === "dislike") {
-
+           
             if (!likesExists) {
+
                 let likedoc = {
 
                     userId: userId,
@@ -62,22 +73,31 @@ const likes = async (req, res) => {
                     dislikes: []
 
                 }
-                likedoc.dislikes.push(postId);
+                likedoc.dislikes.push(post.id);
                 post.dislike.push(user.id)
+                post.dislikeCounts++
                 await likesModel.create(likedoc)
+                await postModel.findOneAndUpdate({ _id: postId }, post)
                 return res.status(200).send({ status: true, msg: "success first dislike" })
 
 
             } else {
+
                 if (post.dislike.indexOf(user.id) == -1) {
-                    likesExists.dislikes.push(postId)
+                    if (post.like.indexOf(user.id) !== -1){
+                        post.like.splice(post.like.indexOf(user.id), 1);
+                        likesExists.likes.splice(likesExists.dislikes.indexOf(post.id), 1)
+                        post.likeCounts--;
+                    }
+
+                    likesExists.dislikes.push(post.id)
                     post.dislike.push(user.id)
                     post.dislikeCounts++
-                    await likesModel.findByIdAndUpdate({ userId: userId }, likesExists, { new: true })
-                    await postModel.findByIdAndUpdate({ _id: postId }, { post })
+                    await likesModel.findOneAndUpdate({ userId: userId }, likesExists, { new: true })
+                    await postModel.findByIdAndUpdate({ _id: postId }, post )
                     return res.status(200).send({ status: true, msg: "success dislike" })
                 } else {
-
+                
                     return res.status(200).send({ status: true, msg: "you already dislike this post" })
                 }
 

@@ -15,13 +15,14 @@ router.put('/updateUser/:userId', middleware.authentication,middleware.authoriza
 
  router.post('/post/:userId',  middleware.authentication,middleware.authorization, postCntroller.createPost)
  router.put('/updatepost/:userId',  middleware.authentication,middleware.authorization, postCntroller.updatePost)
+ router.get('/getpost', middleware.authentication,middleware.authorization, postCntroller.getPost)
  router.delete('/deletepost/:userId', middleware.authentication,middleware.authorization, postCntroller.deletePost)
 
  router.post('/follow/:userId', middleware.authentication,middleware.authorization, followUnfollowController.follow);
  router.post('/likes/:userId', middleware.authentication,middleware.authorization, likesController.likes);
 
- router.get('/profile/:userId', middleware.authentication, profileCOntroller.profile);
- router.get('/userlikedpost/:userId',middleware.authentication, getLikedPost.myLikedPost);
+ router.get('/profile/:userId', middleware.authentication,middleware.authorization, profileCOntroller.profile);
+ router.get('/userlikedpost/:userId',middleware.authentication,middleware.authorization, getLikedPost.myLikedPost);
 
 router.get("*", async function(req,res){
     return res.status(404).send({status:false, message:"page not found"})

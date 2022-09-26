@@ -21,6 +21,8 @@ const follow = async (req, res) => {
         if (!person) {
             return res.status(404).send({ status: false, msg: "ERROR! person not found" })
         }
+
+
         if (request === "follow" || request === "unfollow") {
 
             if (request === "follow") {
@@ -48,22 +50,22 @@ const follow = async (req, res) => {
 
                         result = await followersModel.findOneAndUpdate({ userId: user.id }, followers, { new: true })
                     }
-                    let floowing = await followersModel.findOne({ userId: person.id })//({new:true})
-                    if (floowing == null) {
-                        floowing = {
+                    let followings = await followersModel.findOne({ userId: person.id })//({new:true})
+                    if (followings == null) {
+                        followings = {
                             followers: []
                         }
-                        floowing.userId = person.id;
-                        floowing.followersCount = 1;
-                        floowing.followers.push(user.id);
-                        await followersModel.create(floowing)
+                        followings.userId = person.id;
+                        followings.followersCount = 1;
+                        followings.followers.push(user.id);
+                        await followersModel.create(followings)
 
 
                     } else {
-                        floowing.userId = person.id;
-                        floowing.followersCount++;
-                        floowing.followers.push(user.id)
-                        await followersModel.findOneAndUpdate({ userId: person.id }, floowing, { new: true })
+                        followings.userId = person.id;
+                        followings.followersCount++;
+                        followings.followers.push(user.id)
+                        await followersModel.findOneAndUpdate({ userId: person.id }, followings, { new: true })
 
                     }
                 }

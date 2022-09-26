@@ -9,9 +9,9 @@ const followersSchema = new mongoose.Schema({
         required: true,
         unique:true
     },
-    followers: [{ type: Number, ref: 'Post'}],
+    followers: [{ type: Number, ref: 'User'}],
     followersCount :{type:Number,default:0},
-    following: [{ type: Number, ref: 'Post'}],
+    following: [{ type: Number, ref: 'user'}],
     followingCount :{type:Number,default:0}
 
 
