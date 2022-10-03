@@ -10,6 +10,7 @@ const userSchema =  new mongoose.Schema({
         user_name: {type:String, required:true,unique:true,trim:true},
         email: {type:String, required:true,unique:true},
         profileImage: {type:String, required:true}, // s3 link
+        // profileVideo: [{type:String, required:true}], // s3 link
         gender:{type:String,enum:["Male", "Female", "Transgender"]},
         phone: {type:String, required:true, unique:true}, 
         password: {type:String, required:true}, // encrypted password

@@ -1,9 +1,13 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId
-const mongoosePagination = require("mongoose-paginate-v2")
+//const mongoosePagination = require("mongoose-paginate-v2")
+const mongoosePagination = require("mongoose-aggregate-paginate-v2")
 
 const postSchema = new mongoose.Schema({
-    post: {type:String, required:true}, // s3 link
+    post:{ 
+        image:[{type:String, required:true}],
+        videos:[{type:String, required:true}],
+    }, // s3 link
     text: {
         type: String,
         maxlength: 500,
@@ -41,6 +45,6 @@ const postSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-postSchema.plugin(mongoosePagination)
+ postSchema.plugin(mongoosePagination)
 
 module.exports = mongoose.model('Post', postSchema) //users

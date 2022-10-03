@@ -1,42 +1,12 @@
-
+const path = require("path");
 const postModel = require("../Models/postModel");
 const userModel = require("../Models/userSchema");
 const moment = require('moment')
 const validator = require("../Validator/validator")
-const aws = require("aws-sdk");
-const { response } = require("express");
-aws.config.update(
-  {
-    accessKeyId: "AKIAY3L35MCRVFM24Q7U",
-    secretAccessKey: "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",
-    region: "ap-south-1"
-  }
-)
-let uploadFile = async (file) => {
-  return new Promise(async function (resolve, reject) {
-    // Promise.reject(reason) Returns a new Promise object that is rejected with the given reason.
-    // Promise.resolve(value) Returns a new Promise object that is resolved with the given value.
-    let s3 = new aws.S3({ apiVersion: "2006-03-01" }) //we will be using s3 service of aws  
-    var uploadParams = {
-      ACL: "public-read",
-      Bucket: "classroom-training-bucket",
-      Key: "radhika/" + file.originalname,
-      Body: file.buffer
-    }
-    s3.upload(uploadParams, function (err, data) {
-      if (err) {
-        return reject({ "error": err })
-      }
-      console.log(data)
-      console.log(" file uploaded succesfully ")
-      return resolve(data.Location) // HERE
-    })
-
-  })
-}
-
-
-
+//const aws = require("aws-sdk");
+//const { response } = require("express");
+const mongoose = require("mongoose")
+//const paginate = require("mongoose-aggregate-paginate-v2");
 
 const createPost = async function (req, res) {
   try {
@@ -50,17 +20,43 @@ const createPost = async function (req, res) {
     let user = await userModel.findById(userId)
     if (!user) res.satus(404).send({ msg: "user with this id is not valid" })
 
-    let uploadedFileURL;
+    let uploadedFileURL =[];
+
+
+    req.body.post = {
+      image:[],
+      videos:[]
+   }
+
+
 
     let files = req.files // file is the array
+            
     if (files && files.length > 0) {
 
-      uploadedFileURL = await uploadFile(files[0])
+const acceptableImageExtensions = ['png', 'jpg', 'jpeg', 'jpg'];
+const acceptableVideoExtensions = ['mp4','mkv'];
 
-    }
-    else {
-      return res.status(400).send({ msg: "No file found in request for postImage" })
-    }
+for(let post of req.files){
+if ((acceptableImageExtensions.some(extension => 
+   path.extname(post.originalname).toLowerCase() === `.${extension}`)
+)){
+   req.body.post.image.push(post.path)
+
+}
+if ((acceptableVideoExtensions.some(extension => 
+   path.extname(post.originalname).toLowerCase() === `.${extension}`)
+)){
+  req.body.post.videos.push(post.path)
+
+}
+}
+}
+else {
+           return res.status(400).send({ msg: "No file found in request for profileImage" })
+}
+
+
     let id;
     const data = await postModel.find();
     if (data.length === 0) {
@@ -75,7 +71,7 @@ const createPost = async function (req, res) {
       id = lastItemId + 1
     }
     req.body.id = id
-    req.body.post = uploadedFileURL;
+    
     req.body.userId = userId
     let savedData = await postModel.create(req.body)
     res.status(201).send({ status: true, data: savedData })
@@ -92,17 +88,36 @@ const getPost = async (req, res) => {
 
   try {
 
-    if (req.query.page && req.query.limit) {
 
-      postModel.paginate({ userId: { $ne: req.query.userId } ,status :"Public"}, { page: req.query.page, limit: req.query.limit })
-        .then((response) => {
+    let user = await userModel.findById(req.query.userId)
+    if (!user) res.satus(404).send({ msg: "user with this id is not valid" })
+    let Id = user.id
+    if (req.query.page && req.query.limit) {
+      const userId =  mongoose.Types.ObjectId(req.query.userId); // req.query.userId
+       const condition = postModel.aggregate([
+        { '$match'    : {$and: [{userId: { $ne:userId}},{status :"Public"}, {isDeleted:false } ]}},
+        {
+          '$addFields': {
+            you_like_post: {
+                  $cond: [{ $in: [Id,"$like"] }, "Yes", "No"]
+                 // $cond: [{ $eq:["$like",'15'] }, "Yes", "No"]
+              }
+          }
+      },// { $sample: { size: 2 }},
+        { '$sort'     : { createdAt: -1} },
+        // { '$facet'    : {
+        //     metadata: [ { $count: "total" },{ $addFields: { page: Number(req.query.page) } } ],
+        //     data: [ { $limit: Number(req.query.limit) } ] // add projection here wish you re-shape the docs
+        // } }
+    ] )
+    postModel.aggregatePaginate(condition, { page: req.query.page, limit: req.query.limit })
+      //postModel.paginate({}, { page: req.query.page, limit: req.query.limit })
+       .then((response) => {
           return res.status(200).send({ status: true, data: response })
-        })
+       })
         .catch((error) => {
           return res.status(400).send({ status: true, msg: error.message })
         })
-
-
     } else {
       postModel.find({ userId: { $ne: req.query.userId } ,status :"Public"})
         .then((response) => {
@@ -111,15 +126,11 @@ const getPost = async (req, res) => {
         .catch((error) => {
           return res.status(400).send({ status: true, msg: error.message })
         })
-
-
     }
-
-
   } catch (error) {
 
     console.log(error)
-    return res.status(500).send({ mgs: "Error", error: err.message })
+    return res.status(500).send({ mgs: "Error", error: error.message })
 
   }
 }
