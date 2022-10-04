@@ -12,17 +12,20 @@ const likes = async (req, res) => {
         }
         const { postId, request } = req.body;
         const userId = req.params.userId
-        const user = await userModel.findById({ _id: userId, isDeleted: false })
-
+        const user = await userModel.findById({ _id: userId })
+        console.log("DDDDDDDD",user)
         if (!user) {
             return res.status(404).send({ status: false, msg: "ERROR! user not found" })
         }
         const likesExists = await likesModel.findOne({ userId: userId }).lean()
 
-        const post = await postModel.findById({ _id: postId }).lean();
+        const post = await postModel.findOne({ _id: postId , isDeleted: false}).lean();
 
         if (!post) {
             return res.status(404).send({ status: false, msg: "ERROR! post not found" })
+        }
+        if(post.status == "Private"){
+            return res.status(400).send({status:true, msg:"this post is private you can not like this post"})
         }
         if (request === "like") {
             console.log("likeExists", likesExists)

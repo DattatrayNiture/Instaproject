@@ -333,7 +333,7 @@ const updateUser = async function (req, res) {
     try {
         const userId = req.params.userId
         let requestBody = req.body
-
+   // console.log(req, req.body, req.file, req.files)
         if (!validator.isValidBody(req.body) && !req.files) {
             return res.status(400).send({ status: false, message: "ERROR! : request body is empty" });
         }
@@ -437,21 +437,74 @@ const updateUser = async function (req, res) {
             const hashPassword = await bcrypt.hash(password, salt)
             requestBody.password = hashPassword
         }
-        let uploadedFileURL;
 
-        let files = req.files // file is the array
 
-        if (files && files.length > 0) {
+        // let uploadedFileURL;
 
-            uploadedFileURL = await uploadFile(files[0])
+        // let files = req.files // file is the array
 
-            if (uploadedFileURL) {
-                req.body.profileImage = uploadedFileURL
-            } else {
-                return res.status(400).send({ status: false, message: "error uploadedFileURL is not present" })
-            }
+        // if (files && files.length > 0) {
+
+        //     uploadedFileURL = await uploadFile(files[0])
+
+        //     if (uploadedFileURL) {
+        //         req.body.profileImage = uploadedFileURL
+        //     } else {
+        //         return res.status(400).send({ status: false, message: "error uploadedFileURL is not present" })
+        //     }
+        // }
+
+
+
+
+
+
+
+
+
+        
+        const media = {
+            Image:[],
+            Video:[]
         }
+
+     let files = req.files // file is the array
+        
+     if (files && files.length > 0) {
+
+        const acceptableImageExtensions = ['png', 'jpg', 'jpeg', 'jpg']
+        const acceptableVideoExtensions = ['mp4','mkv']
+        for(let post of req.files){
+        if ((acceptableImageExtensions.some(extension => 
+            path.extname(post.originalname).toLowerCase() === `.${extension}`)
+        )){
+            media.Image.push(post.path)
+            req.body.profileImage = post.path;
+            break;
+
+        }
+        if ((acceptableVideoExtensions.some(extension => 
+            path.extname(post.originalname).toLowerCase() === `.${extension}`)
+        )){
+            media.Video.push(post.path)
+
+        }
+        }
+     } //else {
+    //             return res.status(400).send({ msg: "No file found in request for profileImage" })
+    // }
+    
+
+
+
+
+
+
+
         const update = req.body
+
+
+
 
         const updatedData = await userModel.findOneAndUpdate({ _id: userId }, update, { new: true })
         if (updatedData) {

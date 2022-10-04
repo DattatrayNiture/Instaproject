@@ -24,7 +24,11 @@ const profile = async (req, res) =>{
         let postCount = post.length
         for (let i = 0; i < post.length; i++){
             likes = [...likes, ...post[i].like ]
+        
         }
+        likes = likes.filter((elem, index, arr)=>{
+            return arr.indexOf(elem) === index
+        })
         let profiledata;
         if(followerInfo){
          profiledata = {

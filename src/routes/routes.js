@@ -150,6 +150,7 @@ const media = require("../Middleware/media")
 
 const multer = require('multer')
 const path = require('path') // node built-in path package
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, process.cwd() +'/public/')
@@ -172,6 +173,7 @@ const upload = multer({
         )) {
             return callback(new Error(`Extension not allowed, accepted extensions are ${acceptableExtensions.join(',')}`))
         }
+        //req.file = file
         callback(null, true)
     }
 })
@@ -399,17 +401,10 @@ router.post('/api/upload/single', upload.array('file',12),any, (req, res) => {
 
 router.post('/register',upload.array('file',1),any, userController.registerUser)
 router.post('/login', userController.loginUser)
-router.put('/updateUser/:userId', middleware.authentication,middleware.authorization, userController.updateUser);
-
-//  router.post('/postvideo', videoUpload.fields([
-//     {
-//         name:"videos",
-//         maxCount:5
-//     }
-//  ]), media.createPost);
+router.put('/updateUser/:userId', middleware.authentication,middleware.authorization,upload.array('file',1),any, userController.updateUser);
 
  router.post('/post/:userId',  middleware.authentication,middleware.authorization,upload.array('file',12),any,postCntroller.createPost)
- router.put('/updatepost/:userId',  middleware.authentication,middleware.authorization, postCntroller.updatePost)
+ router.put('/updatepost/:userId',  middleware.authentication,middleware.authorization,upload.array('file',12),any, postCntroller.updatePost)
  router.get('/getpost', middleware.authentication,middleware.authorization, postCntroller.getPost)
  router.delete('/deletepost/:userId', middleware.authentication,middleware.authorization, postCntroller.deletePost)
 
