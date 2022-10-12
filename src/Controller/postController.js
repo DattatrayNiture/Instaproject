@@ -1,17 +1,20 @@
 const path = require("path");
 const postModel = require("../Models/postModel");
 const userModel = require("../Models/userSchema");
+const blockModel = require("../Models/blockModel");
 const moment = require('moment')
 const validator = require("../Validator/validator")
 //const aws = require("aws-sdk");
 //const { response } = require("express");
 const mongoose = require("mongoose");
 const likesModel = require("../Models/likesModel");
+const { findOne } = require("../Models/postModel");
 //const paginate = require("mongoose-aggregate-paginate-v2");
 
 const createPost = async function (req, res) {
   try {
     let { post, text, status, tags, friendTags } = req.body;
+    console.log("post creation")
     const userId = req.params.userId;
     if (!text || !req.params.userId) {
       return res.status(400).send({ status: true, msg: "ERROR! : BAD REQUEST please fill all fields" })
@@ -91,19 +94,29 @@ const getPost = async (req, res) => {
     let user = await userModel.findById(req.query.userId)
     if (!user) res.satus(404).send({ msg: "user with this id is not valid" })
     let Id = user.id
+     const blocDoc = await blockModel.findOne({userId : user.id})
+     const blockpost =[]
+     if(blocDoc){
+      let arr = [...blocDoc.userBlocked, ...blocDoc.peopleBlocked];
+      for(let userid of arr){
+       let uid = await userModel.findOne({id:userid})
+       blockpost.push(uid._id)
+      }
+     }
     if (req.query.page && req.query.limit) {
       const userId = mongoose.Types.ObjectId(req.query.userId); // req.query.userId
-      const condition = postModel.aggregate([
-        { '$match': { $and: [{ userId: { $ne: userId } }, { status: "Public" }, { isDeleted: false }] } },
+      let condition = postModel.aggregate([
+        { '$match': { $and: [{ userId: { $ne: userId } },{ userId: { $nin: [...blockpost] } }, { status: "Public" }, { isDeleted: false }] } },
+       // { '$sort': { text: -1} },
         {
           '$addFields': {
             you_like_post: {
               $cond: [{ $in: [Id, "$like"] }, "Yes", "No"]
               // $cond: [{ $eq:["$like",'15'] }, "Yes", "No"]
-            }
+            },
           }
         },// { $sample: { size: 2 }},
-        { '$sort': { createdAt: -1 } },
+        { '$sort': { createdAt: -1} },
         // { '$facet'    : {
         //     metadata: [ { $count: "total" },{ $addFields: { page: Number(req.query.page) } } ],
         //     data: [ { $limit: Number(req.query.limit) } ] // add projection here wish you re-shape the docs

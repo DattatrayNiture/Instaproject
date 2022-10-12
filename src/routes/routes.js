@@ -8,6 +8,7 @@ const profileCOntroller = require("../Controller/profileController")
 const getLikedPost = require("../Controller/getLikedPost");
 const middleware = require("../Middleware/auth");
 const media = require("../Middleware/media")
+const blockController = require("../Controller/blockController")
 
 
 
@@ -125,7 +126,7 @@ const media = require("../Middleware/media")
 //     try{
 //         console.log(req.file)
 //         res.send("file uploaded successfully")
-        
+
 //     }catch(error){
 //         return res.status(500).send({status:false,error:error }) 
 //     }
@@ -153,7 +154,7 @@ const path = require('path') // node built-in path package
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, process.cwd() +'/public/')
+        cb(null, process.cwd() + '/public/')
     },
     filename: function (req, file, cb) {
         const originalName = encodeURIComponent(path.parse(file.originalname).name).replace(/[^a-zA-Z0-9]/g, '')
@@ -167,8 +168,8 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 55 * 1024 * 1024 }, // 1 Mb
     fileFilter: (req, file, callback) => {
-        const acceptableExtensions = ['png','jpg', 'jpeg', 'jpg','mp4']
-        if (!(acceptableExtensions.some(extension => 
+        const acceptableExtensions = ['png', 'jpg', 'jpeg', 'jpg', 'mp4']
+        if (!(acceptableExtensions.some(extension =>
             path.extname(file.originalname).toLowerCase() === `.${extension}`)
         )) {
             return callback(new Error(`Extension not allowed, accepted extensions are ${acceptableExtensions.join(',')}`))
@@ -178,37 +179,37 @@ const upload = multer({
     }
 })
 
-const any = ((req, res, next)=>{
+const any = ((req, res, next) => {
 
     router.use(multer().any())
     next();
 })
 
 
-router.post('/api/upload/single', upload.array('file',12),any, (req, res) => {
+router.post('/api/upload/single', upload.array('file', 12), any, (req, res) => {
     const acceptableImageExtensions = ['png', 'jpg', 'jpeg', 'jpg']
-    const acceptableVideoExtensions = ['mp4','mkv']
+    const acceptableVideoExtensions = ['mp4', 'mkv']
     const media = {
-        Image:[],
-        Video:[]
+        Image: [],
+        Video: []
     }
 
-     console.log("requestbody", req.body);
-    for(let post of req.files){
-    if ((acceptableImageExtensions.some(extension => 
-        path.extname(post.originalname).toLowerCase() === `.${extension}`)
-    )){
-        media.Image.push(post.path)
+    console.log("requestbody", req.body);
+    for (let post of req.files) {
+        if ((acceptableImageExtensions.some(extension =>
+            path.extname(post.originalname).toLowerCase() === `.${extension}`)
+        )) {
+            media.Image.push(post.path)
 
-    }
-    if ((acceptableVideoExtensions.some(extension => 
-        path.extname(post.originalname).toLowerCase() === `.${extension}`)
-    )){
-        media.Video.push(post.path)
+        }
+        if ((acceptableVideoExtensions.some(extension =>
+            path.extname(post.originalname).toLowerCase() === `.${extension}`)
+        )) {
+            media.Video.push(post.path)
 
+        }
     }
-    }
-    res.status(200).json({data1:req.files, data2:media});
+    res.status(200).json({ data1: req.files, data2: media });
 })
 
 
@@ -222,17 +223,17 @@ router.post('/api/upload/single', upload.array('file',12),any, (req, res) => {
 //     if (!req.files || Object.keys(req.files).length === 0) {
 //       return res.status(400).send('No files were uploaded.');
 //     }
-  
+
 //     // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
 //     let sampleFile = req.files.sampleFile;
-  
+
 //     // Use the mv() method to place the file somewhere on your server
 //     //process.cwd() + '/public/'
 //     //sampleFile.mv('/somewhere/on/your/server/filename.jpg', function(err) {
 //     sampleFile.mv(process.cwd()+'/photos/', function(err) {
 //       if (err)
 //         return res.status(500).send(err);
-  
+
 //       res.send('File uploaded!');
 //     });
 //   });
@@ -248,29 +249,29 @@ router.post('/api/upload/single', upload.array('file',12),any, (req, res) => {
 
 
 
- // router.post('/myvideo', async (req, res) => {
+// router.post('/myvideo', async (req, res) => {
 
-    // if (!req.headers.room_id) {
-    //     logger.warn(error.MANDATORY_FIELDS);
-    //     return res.status(500).send(error.MANDATORY_FIELDS)
-    // }
+// if (!req.headers.room_id) {
+//     logger.warn(error.MANDATORY_FIELDS);
+//     return res.status(500).send(error.MANDATORY_FIELDS)
+// }
 
-   // try {
-        // let storage = multer.diskStorage({
-        //     destination: function (req, file, cb) {
-        //         let id = req.headers.room_id;
-        //         let path = `tmp/daily_gasoline_report/${id}`;
-        //         fsextra.mkdirsSync(path);
-        //         cb(null, path);
-        //     },
-        //     filename: function (req, file, cb) {
-        //         // console.log(file);
-        
-        //         let extArray = file.mimetype.split("/");
-        //         let extension = extArray[extArray.length - 1];
-        //         cb(null, file.fieldname + '-' + Date.now() + "." + extension);
-        //     }
-        // })
+// try {
+// let storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         let id = req.headers.room_id;
+//         let path = `tmp/daily_gasoline_report/${id}`;
+//         fsextra.mkdirsSync(path);
+//         cb(null, path);
+//     },
+//     filename: function (req, file, cb) {
+//         // console.log(file);
+
+//         let extArray = file.mimetype.split("/");
+//         let extension = extArray[extArray.length - 1];
+//         cb(null, file.fieldname + '-' + Date.now() + "." + extension);
+//     }
+// })
 //         var upload = multer({ storage: storage }).array('images', 100);
 //         upload(req, res, function (err) {
 //             if (err) {
@@ -399,23 +400,24 @@ router.post('/api/upload/single', upload.array('file',12),any, (req, res) => {
 
 
 
-router.post('/register',upload.array('file',1),any, userController.registerUser)
-router.post('/login', userController.loginUser)
-router.put('/updateUser/:userId', middleware.authentication,middleware.authorization,upload.array('file',1),any, userController.updateUser);
+router.post('/register', upload.array('file', 1), any, userController.registerUser)
+router.post('/login', userController.loginUser);
+router.post('/block/:userId', middleware.authentication, middleware.authorization, blockController.block);
+router.put('/updateUser/:userId', middleware.authentication, middleware.authorization, upload.array('file', 1), any, userController.updateUser);
 
- router.post('/post/:userId',  middleware.authentication,middleware.authorization,upload.array('file',12),any,postCntroller.createPost)
- router.put('/updatepost/:userId',  middleware.authentication,middleware.authorization,upload.array('file',12),any, postCntroller.updatePost)
- router.get('/getpost', middleware.authentication,middleware.authorization, postCntroller.getPost)
- router.delete('/deletepost/:userId', middleware.authentication,middleware.authorization, postCntroller.deletePost)
+router.post('/post/:userId', middleware.authentication, middleware.authorization, upload.array('file', 12), any, postCntroller.createPost)
+router.put('/updatepost/:userId', middleware.authentication, middleware.authorization, upload.array('file', 12), any, postCntroller.updatePost)
+router.get('/getpost', middleware.authentication, middleware.authorization, postCntroller.getPost)
+router.delete('/deletepost/:userId', middleware.authentication, middleware.authorization, postCntroller.deletePost)
 
- router.post('/follow/:userId', middleware.authentication,middleware.authorization, followUnfollowController.follow);
- router.post('/likes/:userId', middleware.authentication,middleware.authorization, likesController.likes);
+router.post('/follow/:userId', middleware.authentication, middleware.authorization, followUnfollowController.follow);
+router.post('/likes/:userId', middleware.authentication, middleware.authorization, likesController.likes);
 
- router.get('/profile/:userId', middleware.authentication,middleware.authorization, profileCOntroller.profile);
- router.get('/userlikedpost/:userId',middleware.authentication,middleware.authorization, getLikedPost.myLikedPost);
+router.get('/profile/:userId', middleware.authentication, middleware.authorization, profileCOntroller.profile);
+router.get('/userlikedpost/:userId', middleware.authentication, middleware.authorization, getLikedPost.myLikedPost);
 
-router.get("*", async function(req,res){
-    return res.status(404).send({status:false, message:"page not found"})
+router.get("*", async function (req, res) {
+    return res.status(404).send({ status: false, message: "page not found" })
 })
 
 

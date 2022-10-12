@@ -2,6 +2,7 @@ const likesModel = require("../Models/likesModel")
 const validator = require("../Validator/validator");
 const userModel = require("../Models/userSchema");
 const postModel = require("../Models/postModel");
+const blockModel = require("../Models/blockModel");
 
 const likes = async (req, res) => {
     try {
@@ -24,6 +25,17 @@ const likes = async (req, res) => {
         if (!post) {
             return res.status(404).send({ status: false, msg: "ERROR! post not found" })
         }
+        const person = await userModel.findOne({_id: post.userId})
+        const bolcDoc = await blockModel.findOne({ userId: user.id });
+// console.log(bolcDoc.userBlocked)
+// console.log(bolcDoc.peopleBlocked)
+// console.log(bolcDoc, person.id, bolcDoc.userBlocked.indexOf(person.id), bolcDoc.peopleBlocked.indexOf(person.id))
+        if (bolcDoc && ( bolcDoc.userBlocked.indexOf(person.id) != -1 || bolcDoc.peopleBlocked.indexOf(person.id) != -1 )) {
+            return res.status(400).send({ status: false, msg: "ERROR! you block this person or person blocked you" })
+        }
+
+
+
         if(post.status == "Private"){
             return res.status(400).send({status:true, msg:"this post is private you can not like this post"})
         }

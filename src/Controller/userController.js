@@ -61,7 +61,7 @@ const storage = multer.diskStorage({
         const originalName = encodeURIComponent(path.parse(file.originalname).name).replace(/[^a-zA-Z0-9]/g, '')
         const timestamp = Date.now()
         console.log("destination")
-        console.log(req,file)
+        console.log(req, file)
         const extension = path.extname(file.originalname).toLowerCase()
         cb(null, originalName + '_' + timestamp + extension)
     }
@@ -71,10 +71,10 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 55 * 1024 * 1024 }, // 1 Mb
     fileFilter: (req, file, callback) => {
-            console.log("2 ok")
+        console.log("2 ok")
 
         const acceptableExtensions = ['png', 'jpg', 'jpeg', 'jpg', 'mp4']
-        if (!(acceptableExtensions.some(extension => 
+        if (!(acceptableExtensions.some(extension =>
             path.extname(file.originalname).toLowerCase() === `.${extension}`)
         )) {
             return callback(new Error(`Extension not allowed, accepted extensions are ${acceptableExtensions.join(',')}`))
@@ -102,7 +102,7 @@ const registerUser = async function (req, res) {
                 .send({ status: false, message: "ERROR! : request body is empty" });
         } else {
 
-            const { name, user_name, phone, email, gender, password, confirmPassword , Profile } = requestBody;
+            const { name, user_name, phone, email, gender, password, confirmPassword, Profile } = requestBody;
             let isName = /^[A-Za-z ]*$/;
 
             if (!validator.isValid(name)) {
@@ -158,7 +158,7 @@ const registerUser = async function (req, res) {
             }
             if (profileFrom.indexOf(Profile) == -1) {
                 return res.status(400).send({ status: false, msg: "BAD REQUEST Profile status is invalid" })
-                
+
             }
             const isEmailAlreadyUsed = await userModel.findOne({
                 email,
@@ -204,35 +204,35 @@ const registerUser = async function (req, res) {
 
 
             const media = {
-                Image:[],
-                Video:[]
+                Image: [],
+                Video: []
             }
 
-         let files = req.files // file is the array
-            
-         if (files && files.length > 0) {
-    
-    const acceptableImageExtensions = ['png', 'jpg', 'jpeg', 'jpg']
-    const acceptableVideoExtensions = ['mp4','mkv']
-    for(let post of req.files){
-    if ((acceptableImageExtensions.some(extension => 
-        path.extname(post.originalname).toLowerCase() === `.${extension}`)
-    )){
-        media.Image.push(post.path)
+            let files = req.files // file is the array
 
-    }
-    if ((acceptableVideoExtensions.some(extension => 
-        path.extname(post.originalname).toLowerCase() === `.${extension}`)
-    )){
-        media.Video.push(post.path)
+            if (files && files.length > 0) {
 
-    }
-    }
-    }else {
+                const acceptableImageExtensions = ['png', 'jpg', 'jpeg', 'jpg']
+                const acceptableVideoExtensions = ['mp4', 'mkv']
+                for (let post of req.files) {
+                    if ((acceptableImageExtensions.some(extension =>
+                        path.extname(post.originalname).toLowerCase() === `.${extension}`)
+                    )) {
+                        media.Image.push(post.path)
+
+                    }
+                    if ((acceptableVideoExtensions.some(extension =>
+                        path.extname(post.originalname).toLowerCase() === `.${extension}`)
+                    )) {
+                        media.Video.push(post.path)
+
+                    }
+                }
+            } else {
                 return res.status(400).send({ msg: "No file found in request for profileImage" })
-    }
+            }
 
-        requestBody.profileImage = media.Image[0];
+            requestBody.profileImage = media.Image[0];
 
 
 
@@ -333,7 +333,7 @@ const updateUser = async function (req, res) {
     try {
         const userId = req.params.userId
         let requestBody = req.body
-   // console.log(req, req.body, req.file, req.files)
+        // console.log(req, req.body, req.file, req.files)
         if (!validator.isValidBody(req.body) && !req.files) {
             return res.status(400).send({ status: false, message: "ERROR! : request body is empty" });
         }
@@ -358,7 +358,7 @@ const updateUser = async function (req, res) {
         }
 
         if (user_name) {
-           
+
             if (!validator.isValid(user_name)) {
                 return res
                     .status(400)
@@ -462,38 +462,38 @@ const updateUser = async function (req, res) {
 
 
 
-        
+
         const media = {
-            Image:[],
-            Video:[]
+            Image: [],
+            Video: []
         }
 
-     let files = req.files // file is the array
-        
-     if (files && files.length > 0) {
+        let files = req.files // file is the array
 
-        const acceptableImageExtensions = ['png', 'jpg', 'jpeg', 'jpg']
-        const acceptableVideoExtensions = ['mp4','mkv']
-        for(let post of req.files){
-        if ((acceptableImageExtensions.some(extension => 
-            path.extname(post.originalname).toLowerCase() === `.${extension}`)
-        )){
-            media.Image.push(post.path)
-            req.body.profileImage = post.path;
-            break;
+        if (files && files.length > 0) {
 
-        }
-        if ((acceptableVideoExtensions.some(extension => 
-            path.extname(post.originalname).toLowerCase() === `.${extension}`)
-        )){
-            media.Video.push(post.path)
+            const acceptableImageExtensions = ['png', 'jpg', 'jpeg', 'jpg']
+            const acceptableVideoExtensions = ['mp4', 'mkv']
+            for (let post of req.files) {
+                if ((acceptableImageExtensions.some(extension =>
+                    path.extname(post.originalname).toLowerCase() === `.${extension}`)
+                )) {
+                    media.Image.push(post.path)
+                    req.body.profileImage = post.path;
+                    break;
 
-        }
-        }
-     } //else {
-    //             return res.status(400).send({ msg: "No file found in request for profileImage" })
-    // }
-    
+                }
+                if ((acceptableVideoExtensions.some(extension =>
+                    path.extname(post.originalname).toLowerCase() === `.${extension}`)
+                )) {
+                    media.Video.push(post.path)
+
+                }
+            }
+        } //else {
+        //             return res.status(400).send({ msg: "No file found in request for profileImage" })
+        // }
+
 
 
 

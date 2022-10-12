@@ -31,13 +31,13 @@ const authentication = async function (req, res, next) {
     }
 
     let token = bearerToken.split(" ")[1]
-
+    console.log("token", token)
     jwt.verify(token, secretkey, function (error, decode) {
       if (error) {
         return res
           .status(400)
           .setHeader("Content-Type", "text/JSON")
-          .send({ status: false, message: error.message });
+          .send({ status:false,msg:"message from Token", message: error.message });
       }
       req.token = decode
       next();

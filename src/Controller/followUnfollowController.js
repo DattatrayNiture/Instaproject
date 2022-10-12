@@ -1,6 +1,7 @@
 const followersModel = require("../Models/followUnfollowModel")
 const validator = require("../Validator/validator");
 const userModel = require("../Models/userSchema")
+const blockModel = require("../Models/blockModel")
 
 
 const follow = async (req, res) => {
@@ -21,7 +22,11 @@ const follow = async (req, res) => {
         if (!person) {
             return res.status(404).send({ status: false, msg: "ERROR! person not found" })
         }
+        const bolcDoc = await blockModel.findOne({ userId: user.id });
 
+        if (bolcDoc && ( bolcDoc.userBlocked.indexOf(person.id) != -1 || bolcDoc.peopleBlocked.indexOf(person.id) != -1 )) {
+            return res.status(400).send({ status: false, msg: "ERROR! you block this person or person blocked you" })
+        }
 
         if (request === "follow" || request === "unfollow") {
 

@@ -8,8 +8,8 @@ const likesSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    likes: [{ type:Number, ref: 'Post'}],  
-    dislikes: [{ type: Number, ref: 'Post'}]
+    likes: [{ type:Number,required: true, ref: 'Post'}],  
+    dislikes: [{ type: Number,required: true, ref: 'Post'}]
 
 }, { timestamps: true });
 
